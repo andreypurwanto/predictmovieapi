@@ -1,7 +1,7 @@
 # predictmovieapi
 
 ## Install
-Install requirements
+Install requirements </br>
 `uvicorn main:app --reload`
 
 ## Framework
