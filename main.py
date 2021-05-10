@@ -48,7 +48,7 @@ def multiple_movie(list_movie,movies,knn,top_x):
         if len(list_movie) == 1:
             return {
                 'status':'success',
-                'df':get_movie_recommendation(list_movie[0],movies,knn).head(top_x).reset_index(drop=True)}
+                'recomendation_movies':get_movie_recommendation(list_movie[0],movies,knn).head(top_x).reset_index(drop=True)}
         else:
           for i in range(len(list_movie)):
               if i == 0:
@@ -60,7 +60,7 @@ def multiple_movie(list_movie,movies,knn,top_x):
                   list_df_temp = [df_temp]
           return {
               'status':'success',
-              'df': df_temp.sort_values(by=['Distance'],ascending=False).head(top_x).reset_index(drop=True)}
+              'recomendation_movies': df_temp.sort_values(by=['Distance'],ascending=False).head(top_x).reset_index(drop=True)}
     except:
           return {'status':'error','msg':'invalid input'}
 
@@ -71,10 +71,11 @@ def read_item():
 
 @app.get("/predict_api/")
 async def predict_api(list_movie: str = '',top_x: str = '10'):
+    """input movies, separate by ;, ex: Iron Man;Memento"""
     result = multiple_movie(list_movie.split(';'),movies,knn_,int(top_x))
     # print(result)
     if result['status'] == 'success':
-        result['df'] = result['df'].to_dict('index')
+        result['recomendation_movies'] = result['recomendation_movies'].to_dict('index')
         result['list_movies'] = list_movie.split(';')
         # print(list_movie.split(';'))
         # result['list']
@@ -84,6 +85,7 @@ async def predict_api(list_movie: str = '',top_x: str = '10'):
 
 @app.get("/user_predict/")
 async def user_predict(user: str = '',top_x: str = '10'):
+    """input 0 to 999"""
     df = pd.read_csv('user_dummy.csv').groupby(['user'])['mov_fav'].apply(lambda x: ';'.join(x)).reset_index()
     df = df[df['user']==int(user)]
     list_movie = df['mov_fav'][df.index[0]]
@@ -91,7 +93,7 @@ async def user_predict(user: str = '',top_x: str = '10'):
     result = multiple_movie(list_movie.split(';'),movies,knn_,int(top_x))
     # print(result)
     if result['status'] == 'success':
-        result['df'] = result['df'].to_dict('index')
+        result['recomendation_movies'] = result['recomendation_movies'].to_dict('index')
         result['list_movies'] = list_movie.split(';')
         # print(list_movie.split(';'))
         # result['list']
