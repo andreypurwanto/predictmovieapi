@@ -70,21 +70,26 @@ def read_item():
     return {'1':'/predict_api/','2':'/user_predict/'}
 
 @app.get("/predict_api/")
-async def predict_api(list_movie: str = '',top_x: str = '10'):
+async def predict_api(list_movie: str = 'Iron Man',top_x: str = '5'):
     """input movies, separate by ;, ex: Iron Man;Memento"""
     result = multiple_movie(list_movie.split(';'),movies,knn_,int(top_x))
     # print(result)
     if result['status'] == 'success':
         result['recomendation_movies'] = result['recomendation_movies'].to_dict('index')
         result['list_movies'] = list_movie.split(';')
+        result2 = {}
+        result2['status'] = result['status']
+        result2['your_list_movies'] = result['list_movies']
+        result2['recomendation_movies'] = result['recomendation_movies']
+        # print(tes)
         # print(list_movie.split(';'))
         # result['list']
-        return result
+        return result2
     else:
         return result
 
 @app.get("/user_predict/")
-async def user_predict(user: str = '',top_x: str = '10'):
+async def user_predict(user: str = '0',top_x: str = '5'):
     """input 0 to 999"""
     df = pd.read_csv('user_dummy.csv').groupby(['user'])['mov_fav'].apply(lambda x: ';'.join(x)).reset_index()
     df = df[df['user']==int(user)]
@@ -95,9 +100,14 @@ async def user_predict(user: str = '',top_x: str = '10'):
     if result['status'] == 'success':
         result['recomendation_movies'] = result['recomendation_movies'].to_dict('index')
         result['list_movies'] = list_movie.split(';')
+        result2 = {}
+        result2['status'] = result['status']
+        result2['user_id'] = user
+        result2['user_list_movies'] = result['list_movies']
+        result2['recomendation_movies'] = result['recomendation_movies']
         # print(list_movie.split(';'))
         # result['list']
-        return result
+        return result2
     else:
         return result
 
